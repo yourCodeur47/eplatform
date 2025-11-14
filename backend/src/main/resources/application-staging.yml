@@ -1,0 +1,148 @@
+# ============================================================================
+# Configuration Spring Boot - Environnement STAGING (Pré-production)
+# ============================================================================
+
+spring:
+  # ========== DataSource Configuration ==========
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: EplatformHikariPool-Staging
+
+  # ========== JPA / Hibernate ==========
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        generate_statistics: true
+
+  # ========== Redis Configuration ==========
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      timeout: 60000
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 4
+          max-wait: 2000ms
+        cluster:
+          refresh:
+            adaptive: true
+
+  # ========== Mail Configuration ==========
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: ${MAIL_HOST}
+
+# ============================================================================
+# Application Configuration - Staging
+# ============================================================================
+app:
+  # ========== JWT Configuration ==========
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: 3600000
+    refresh-token-expiration: 604800000
+
+  # ========== File Storage ==========
+  storage:
+    type: ${STORAGE_TYPE:minio}
+    minio:
+      endpoint: ${MINIO_ENDPOINT}
+      access-key: ${MINIO_ACCESS_KEY}
+      secret-key: ${MINIO_SECRET_KEY}
+      bucket-name: ${MINIO_BUCKET}
+
+  # ========== CORS ==========
+  cors:
+    allowed-origins: ${CORS_ORIGINS}
+
+  # ========== Security ==========
+  security:
+    rate-limit:
+      enabled: true
+      requests-per-minute: 100
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: on-param
+    include-exception: false
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  level:
+    root: INFO
+    com.eplatform: INFO
+    org.springframework.web: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: INFO
+  file:
+    name: /var/log/eplatform/eplatform-staging.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 3GB
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ============================================================================
+# Actuator Configuration
+# ============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 1m
+
+# ============================================================================
+# SpringDoc OpenAPI - Enabled in Staging
+# ============================================================================
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true

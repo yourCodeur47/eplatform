@@ -1,0 +1,176 @@
+# ============================================================================
+# Configuration Spring Boot - E-Platform Backend
+# Configuration commune à tous les environnements
+# ============================================================================
+
+spring:
+  application:
+    name: eplatform-backend
+
+  # ========== Profils ==========
+  profiles:
+    active: ${SPRING_PROFILE:local}
+
+  # ========== JPA / Hibernate ==========
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        query:
+          in_clause_parameter_padding: true
+        format_sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+
+  # ========== Liquibase ==========
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: public
+
+  # ========== Jackson ==========
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+    time-zone: UTC
+
+  # ========== Multipart (File Upload) ==========
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+  # ========== Mail Configuration ==========
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    default-encoding: UTF-8
+
+  # ========== Cache Configuration ==========
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 1 hour in milliseconds
+
+# ============================================================================
+# Application Configuration
+# ============================================================================
+app:
+  name: E-Platform
+  version: 0.1.0
+  description: Plateforme de Gestion de Compétences et Formation
+
+  # ========== JWT Configuration ==========
+  jwt:
+    secret: ${JWT_SECRET:changeme-use-at-least-256-bits-secret-key-for-production}
+    access-token-expiration: 3600000      # 1 hour in milliseconds
+    refresh-token-expiration: 604800000   # 7 days in milliseconds
+    issuer: eplatform-backend
+
+  # ========== CORS Configuration ==========
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "*"
+    exposed-headers: Authorization,Link,X-Total-Count
+    allow-credentials: true
+    max-age: 3600
+
+  # ========== Security ==========
+  security:
+    rate-limit:
+      enabled: true
+      requests-per-minute: 60
+    password:
+      bcrypt-strength: 12
+
+  # ========== File Storage ==========
+  storage:
+    type: ${STORAGE_TYPE:minio}
+    base-path: ${STORAGE_BASE_PATH:/uploads}
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+# ============================================================================
+# Actuator Configuration
+# ============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  level:
+    root: INFO
+    com.eplatform: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ============================================================================
+# SpringDoc OpenAPI Configuration
+# ============================================================================
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: false

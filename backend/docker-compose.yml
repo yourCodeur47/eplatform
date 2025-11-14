@@ -1,0 +1,178 @@
+version: '3.8'
+
+# ============================================================================
+# Docker Compose - E-Platform Backend
+# Services d'infrastructure pour l'environnement de développement local
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # PostgreSQL 16 - Base de données principale
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: eplatform-postgres
+    environment:
+      POSTGRES_DB: eplatform_db
+      POSTGRES_USER: eplatform_user
+      POSTGRES_PASSWORD: eplatform_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - eplatform-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eplatform_user -d eplatform_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Redis 7 - Cache distribué et session storage
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: eplatform-redis
+    command: redis-server --appendonly yes --requirepass ""
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eplatform-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================================================
+  # MinIO - Stockage de fichiers S3-compatible
+  # ==========================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: eplatform-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console Web
+    volumes:
+      - minio_data:/data
+    networks:
+      - eplatform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ==========================================================================
+  # MinIO Client - Création automatique du bucket
+  # ==========================================================================
+  minio-init:
+    image: minio/mc:latest
+    container_name: eplatform-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/eplatform-files --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/eplatform-files;
+      exit 0;
+      "
+    networks:
+      - eplatform-network
+
+  # ==========================================================================
+  # MailHog - Serveur SMTP de test pour emails
+  # ==========================================================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: eplatform-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - eplatform-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # pgAdmin 4 - Interface Web pour PostgreSQL (Optionnel)
+  # ==========================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: eplatform-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@eplatform.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - eplatform-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - tools  # Démarrer uniquement avec: docker-compose --profile tools up
+
+# ============================================================================
+# Volumes persistants
+# ============================================================================
+volumes:
+  postgres_data:
+    name: eplatform-postgres-data
+  redis_data:
+    name: eplatform-redis-data
+  minio_data:
+    name: eplatform-minio-data
+  pgadmin_data:
+    name: eplatform-pgadmin-data
+
+# ============================================================================
+# Network
+# ============================================================================
+networks:
+  eplatform-network:
+    name: eplatform-network
+    driver: bridge
+
+# ============================================================================
+# USAGE :
+# ============================================================================
+# Démarrer tous les services :
+#   docker-compose up -d
+#
+# Démarrer avec pgAdmin :
+#   docker-compose --profile tools up -d
+#
+# Arrêter tous les services :
+#   docker-compose down
+#
+# Arrêter et supprimer les volumes (ATTENTION : perte de données) :
+#   docker-compose down -v
+#
+# Voir les logs :
+#   docker-compose logs -f [service_name]
+#
+# Accès aux services :
+#   - PostgreSQL       : localhost:5432
+#   - Redis            : localhost:6379
+#   - MinIO API        : http://localhost:9000
+#   - MinIO Console    : http://localhost:9001 (minioadmin/minioadmin)
+#   - MailHog Web UI   : http://localhost:8025
+#   - pgAdmin          : http://localhost:5050 (admin@eplatform.local/admin)
+# ============================================================================

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Master Changelog File - E-Platform Backend
+
+        Ce fichier master inclut tous les changesets de migration de la base de données.
+        Les changesets sont organisés par version majeure dans des sous-répertoires.
+
+        Convention de nommage :
+        - Répertoires : v{version} (ex: v1.0, v1.1, v2.0)
+        - Fichiers : {sequence}-{description}-{action}.xml
+                     Ex: 001-create-users-table.xml
+                         002-add-email-index.xml
+                         003-insert-default-roles.xml
+
+        Principes :
+        - Jamais modifier un changeset déjà appliqué en production
+        - Toujours créer un nouveau changeset pour les modifications
+        - Tester exhaustivement sur environnement local avant commit
+        - Prévoir un rollback pour les changesets critiques
+    -->
+
+    <!-- ========== Version 1.0 - Initial Release ========== -->
+
+    <!--
+        Les changesets de la version 1.0 seront inclus ici au fur et à mesure
+        de l'implémentation des phases 3, 4 et 5 :
+
+        Phase 3 - Persistance de Base (Users, Roles, Permissions) :
+        <include file="db/changelog/v1.0/001-create-security-tables.xml"/>
+        <include file="db/changelog/v1.0/002-insert-default-roles-permissions.xml"/>
+
+        Phase 5 - Persistance Métier (Entités métier) :
+        <include file="db/changelog/v1.0/003-create-skill-tables.xml"/>
+        <include file="db/changelog/v1.0/004-create-assessment-tables.xml"/>
+        <include file="db/changelog/v1.0/005-create-training-tables.xml"/>
+        <include file="db/changelog/v1.0/006-create-learning-path-tables.xml"/>
+        <include file="db/changelog/v1.0/007-create-additional-tables.xml"/>
+        <include file="db/changelog/v1.0/008-insert-reference-data.xml"/>
+    -->
+
+    <!-- Les includes seront ajoutés progressivement lors des phases 3 et 5 -->
+
+</databaseChangeLog>
