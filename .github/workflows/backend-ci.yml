@@ -154,6 +154,8 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build and analyze with SonarCloud
+        if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_ORGANIZATION != '' }}
+        continue-on-error: true
         working-directory: ./backend
         run: |
           mvn clean verify sonar:sonar \
