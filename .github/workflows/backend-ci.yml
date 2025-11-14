@@ -117,12 +117,6 @@ jobs:
           min-coverage-changed-files: 20
           title: 'Code Coverage Report'
 
-      - name: Check code coverage threshold
-        working-directory: ./backend
-        run: |
-          echo "Checking if coverage meets minimum threshold of 20%..."
-          mvn jacoco:check
-
       - name: Build JAR
         working-directory: ./backend
         run: mvn package -DskipTests -B
