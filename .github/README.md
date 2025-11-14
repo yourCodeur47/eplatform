@@ -16,7 +16,8 @@ Ce répertoire contient les workflows GitHub Actions pour le projet E-Platform.
 - ✅ Génération de rapport de couverture JaCoCo (minimum 80%)
 - ✅ Upload des artefacts (JAR et rapports)
 - ✅ Commentaire de couverture sur les PRs
-- ✅ Analyse de qualité de code avec SonarCloud (optionnel)
+- ✅ Analyse de qualité de code avec SonarCloud
+- ✅ Quality Gate check (si SonarCloud configuré)
 
 **Services:**
 - PostgreSQL 15 (port 5432)
@@ -108,12 +109,14 @@ Ce répertoire contient les workflows GitHub Actions pour le projet E-Platform.
 
 Configurez ces secrets dans les paramètres du repository:
 
-### Optionnels (pour fonctionnalités avancées):
+### Pour l'analyse de qualité (recommandé):
 
 | Secret | Description | Workflow |
 |--------|-------------|----------|
-| `SONAR_TOKEN` | Token SonarCloud | backend-ci.yml |
-| `SONAR_ORGANIZATION` | Organisation SonarCloud | backend-ci.yml |
+| `SONAR_TOKEN` | Token d'authentification SonarCloud | backend-ci.yml |
+| `SONAR_ORGANIZATION` | Nom de votre organisation SonarCloud | backend-ci.yml |
+
+> 📖 **Voir le guide complet** : [SONARCLOUD-SETUP.md](../SONARCLOUD-SETUP.md)
 
 ### Pour le déploiement:
 
@@ -127,11 +130,16 @@ Configurez ces secrets dans les paramètres du repository:
 
 ## 🔧 Configuration
 
-### Activer SonarCloud (optionnel)
+### Activer SonarCloud (recommandé)
 
-1. Créer un compte sur [SonarCloud](https://sonarcloud.io)
-2. Ajouter `SONAR_TOKEN` et `SONAR_ORGANIZATION` dans les secrets
-3. Le workflow détectera automatiquement les secrets et activera l'analyse
+SonarCloud analyse la qualité du code Java (et TypeScript/JavaScript quand le frontend sera ajouté).
+
+**Configuration rapide :**
+1. Créer un compte sur [sonarcloud.io](https://sonarcloud.io) avec GitHub
+2. Importer votre projet
+3. Configurer les secrets (voir [SONARCLOUD-SETUP.md](../SONARCLOUD-SETUP.md))
+
+Le workflow activera automatiquement l'analyse dès que les secrets sont configurés.
 
 ### Configurer le déploiement
 
