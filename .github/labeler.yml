@@ -1,0 +1,46 @@
+# Configuration for PR labeler
+# https://github.com/actions/labeler
+
+'backend':
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**/*'
+
+'frontend':
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.md'
+      - 'docs/**/*'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/pom.xml'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+
+'docker':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/Dockerfile'
+      - '**/docker-compose.yml'
+      - '**/.dockerignore'
+
+'ci/cd':
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'
+
+'security':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY.md'
+      - '**/dependency-check-suppressions.xml'
+
+'database':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/src/main/resources/db/**/*'
+      - '**/init-db.sql'
