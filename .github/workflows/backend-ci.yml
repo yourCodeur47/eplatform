@@ -85,6 +85,17 @@ jobs:
           generate-summary: true
           jacoco-csv-file: backend/target/site/jacoco/jacoco.csv
 
+      - name: Commit and push badge (if main branch)
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          if [[ $(git status --porcelain .github/badges) ]]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add .github/badges
+            git commit -m "Update coverage badge [skip ci]"
+            git push
+          fi
+
       - name: Upload JaCoCo coverage report
         uses: actions/upload-artifact@v4
         with:
