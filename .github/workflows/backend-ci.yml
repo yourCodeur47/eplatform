@@ -16,6 +16,10 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # Pour pusher les badges
+      pull-requests: write   # Pour commenter les PRs
+      checks: write          # Pour créer des checks
 
     services:
       postgres:
