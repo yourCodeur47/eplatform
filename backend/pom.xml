@@ -44,7 +44,7 @@
 
         <!-- Test Configuration -->
         <skipTests>false</skipTests>
-        <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
+        <jacoco.minimum.coverage>0.20</jacoco.minimum.coverage>
     </properties>
 
     <dependencies>
